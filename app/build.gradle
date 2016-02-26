@@ -1,0 +1,131 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        applicationId "com.soulrelay.techlab"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+
+        // dex突破65535限制
+        multiDexEnabled true
+        // 默认打包渠道（官方）
+        manifestPlaceholders = [APP_CHANNEL_VALUE: "官方"]
+    }
+
+    // 打包渠道List
+    productFlavors {
+        myself {
+            manifestPlaceholders = [APP_CHANNEL_VALUE: "官方"]
+        }
+        wandoujia {
+            manifestPlaceholders = [APP_CHANNEL_VALUE: "豌豆荚"]
+        }
+
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    sourceSets {
+   /*     main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            aidl.srcDirs = ['src']
+            renderscript.srcDirs = ['src']
+            res.srcDirs = ['res']
+            assets.srcDirs = ['assets']
+        }*/
+       /* //配置.so文件调用
+        jni.srcDirs = []
+        jniLibs.srcDir 'libs'*/
+
+        // Move the tests to tests/java, tests/res, etc...
+        instrumentTest.setRoot('tests')
+
+        // Move the build types to build-types/<type>
+        // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
+        // This moves them out of them default location under src/<type>/... which would
+        // conflict with src/ being used by the main source set.
+        // Adding new build types or product flavors should be accompanied
+        // by a similar customization.
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+
+    //签名信息
+    signingConfigs {
+        debug{
+            // No Debug Config
+            storeFile file("C:/Users/sushuai/.android/debug.keystore")
+        }
+
+        release {
+            storeFile file("E:/StudioLab/techlab.keystore")
+            storePassword "techlab"
+            keyAlias "techlab"
+            keyPassword "techlab"
+        }
+    }
+    buildTypes {
+        //Debug模式
+        debug {
+            // 显示LOG，在java代码中的调用方式为：BuildConfig.LOG_DEBUG，AS工具可以在BuildConfig.java中新增这个字段，如果还要兼容使用eclipse，不建议使用新增字段，因为eclipse在clean后会重新生成BuildConfig.java（默认使用BuildConfig.DEBUG能满足需要就不要特殊处理了）
+            //buildConfigField "boolean", "LOG_DEBUG", "true"
+
+            versionNameSuffix "-debug"
+            // 不开启混淆
+            minifyEnabled false
+            // 不需要ZIP优化
+            zipAlignEnabled false
+            // 不需要资源压缩
+            shrinkResources false
+            // signingConfig
+            signingConfig signingConfigs.debug
+        }
+
+        //Release模式
+        release {
+            // 不显示LOG
+            //buildConfigField "boolean", "LOG_DEBUG", "true"
+
+            minifyEnabled true
+            zipAlignEnabled true
+            // 资源压缩，移除无用的资源文件
+            shrinkResources true
+            // 混淆文件配置
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // 签名信息配置（如果上面配置了defaultConfig则可以不用指定signingConfig）
+            signingConfig signingConfigs.release
+
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    def outputFile = output.outputFile
+                    if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                        // 输出apk名称为myandroid_v1.0.0_2015-12-30_baidu.apk
+                        def fileName = "myandroid_v${defaultConfig.versionName}_${releaseTime()}_${variant.productFlavors[0].name}.apk"
+                        output.outputFile = new File(outputFile.parent, fileName)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 声明一个方法，获取打包时间
+def releaseTime() {
+    return new Date().format("yyyy-MM-dd", TimeZone.getTimeZone("UTC"))
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
+}
