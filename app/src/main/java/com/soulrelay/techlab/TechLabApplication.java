@@ -3,6 +3,7 @@ package com.soulrelay.techlab;
 import android.app.Application;
 import android.content.Context;
 
+import com.facebook.stetho.Stetho;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -22,6 +23,7 @@ public class TechLabApplication extends Application {
         instance = this;
         super.onCreate();
         initImageLoader(getApplicationContext());
+        Stetho.initializeWithDefaults(this);
 
     }
 
